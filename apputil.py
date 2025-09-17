@@ -1,12 +1,11 @@
 import pandas as pd
 import numpy as np
-import seaborn as sns
 
 
 url = 'https://github.com/melaniewalsh/Intro-Cultural-Analytics/raw/master/book/data/bellevue_almshouse_modified.csv'
 df_bellevue = pd.read_csv(url)
 
-# Exercise 1: 
+# Exercise 1: Fibonacci function
 def fib(n):
     """
     Calculate the nth number in the Fibonacci series using recursion.
@@ -18,6 +17,7 @@ def fib(n):
     Returns:
         The nth Fibonacci number
     """
+
     if n == 0:
         return 0
     elif n == 1:
@@ -27,7 +27,7 @@ def fib(n):
     return fib(n - 1) + fib(n - 2)
 
 
-# Exercise 2: 
+# Exercise 2: Binary conversion
 def to_binary(n):
     """
     Convert an integer to its binary representation using recursion.
@@ -36,18 +36,19 @@ def to_binary(n):
         n: Integer to convert to binary
     
     Returns:
-        Binary representation as an integer (e.g., 12 returns 1100)
+        Binary representation as a string (e.g., 12 returns '1100')
     """
+    
     if n == 0:
-        return 0
+        return '0'
     elif n == 1:
-        return 1
+        return '1'
     
     
-    return to_binary(n // 2) * 10 + (n % 2)
+    return to_binary(n // 2) + str(n % 2)
 
 
-# Exercise 3: 
+# Exercise 3: Data analysis tasks
 def task_i():
     """
     Sort columns by missing values (least to most).
@@ -55,14 +56,17 @@ def task_i():
     """
     global df_bellevue  
     
-
+    # Fix gender column 
     if 'gender' in df_bellevue.columns:
         print("Fixing gender column issues...")
+        # Convert to string to handle mixed types
         df_bellevue['gender'] = df_bellevue['gender'].astype(str)
+        # Clean up whitespace
         df_bellevue['gender'] = df_bellevue['gender'].str.strip()
+        # Replace 'nan' string with actual NaN
         df_bellevue.loc[df_bellevue['gender'] == 'nan', 'gender'] = np.nan
     
-    
+    # Count missing values for each column
     missing_counts = df_bellevue.isnull().sum()
     
     
@@ -80,7 +84,9 @@ def task_ii():
     """
     global df_bellevue
     
+    
     df_temp = df_bellevue.copy()
+    
     
     year_extracted = False
     
@@ -89,10 +95,12 @@ def task_ii():
         year_extracted = True
     elif 'date_in' in df_temp.columns:
         print("Extracting year from 'date_in' column...")
+        
         df_temp['year'] = pd.to_datetime(df_temp['date_in'], errors='coerce').dt.year
         year_col = 'year'
         year_extracted = True
     else:
+        
         for col in df_temp.columns:
             if 'date' in col.lower() or 'year' in col.lower():
                 print(f"Found date/year column: {col}")
@@ -108,12 +116,13 @@ def task_ii():
         print("Warning: No year or date column found!")
         return pd.DataFrame({'year': [], 'total_admissions': []})
     
-
+    
     df_temp = df_temp[df_temp[year_col].notna()]
     
-
+    
     result = df_temp.groupby(year_col).size().reset_index(name='total_admissions')
     result.columns = ['year', 'total_admissions']
+    
     result['year'] = result['year'].astype(int)
     
     print(f"Found data for {len(result)} years, from {result['year'].min()} to {result['year'].max()}")
@@ -127,15 +136,21 @@ def task_iii():
     Returns a Series with gender as index and average age as values.
     """
     global df_bellevue
+    
+    
     df_temp = df_bellevue.copy()
-
+    
+    # Clean gender column
     if 'gender' in df_temp.columns:
         df_temp['gender'] = df_temp['gender'].astype(str).str.strip()
+        # Remove 'nan' strings
         df_temp.loc[df_temp['gender'] == 'nan', 'gender'] = np.nan
+        # Remove empty strings
         df_temp.loc[df_temp['gender'] == '', 'gender'] = np.nan
     else:
         print("Warning: No 'gender' column found!")
         return pd.Series()
+    
     
     age_col = None
     for col in df_temp.columns:
@@ -148,7 +163,9 @@ def task_iii():
         print("Warning: No age column found!")
         return pd.Series()
     
+    
     df_temp[age_col] = pd.to_numeric(df_temp[age_col], errors='coerce')
+    
     
     df_clean = df_temp.dropna(subset=['gender', age_col])
     
@@ -167,7 +184,11 @@ def task_iv():
     Returns a list of the 5 most common professions in order of prevalence.
     """
     global df_bellevue
+    
+    
     df_temp = df_bellevue.copy()
+    
+    
     prof_col = None
     for col in df_temp.columns:
         if any(term in col.lower() for term in ['profession', 'occupation', 'trade', 'job', 'work']):
@@ -179,8 +200,10 @@ def task_iv():
         print("Warning: No profession/occupation column found!")
         print("Available columns:", df_temp.columns.tolist())
         return []
-
+    
+    
     df_temp[prof_col] = df_temp[prof_col].astype(str).str.strip()
+    
     
     valid_professions = df_temp[prof_col][
         (df_temp[prof_col] != 'nan') & 
@@ -188,11 +211,14 @@ def task_iv():
         (df_temp[prof_col].notna())
     ]
     
+    
     profession_counts = valid_professions.value_counts()
     
     if len(profession_counts) == 0:
         print("Warning: No valid professions found!")
         return []
+    
+    
     top_5_professions = profession_counts.head(5).index.tolist()
     
     print(f"Total unique professions: {len(profession_counts)}")
@@ -202,28 +228,41 @@ def task_iv():
     return top_5_professions
 
 
-# Testing section 
+
+fibonacci = fib
+
+
+task_1 = task_i
+task_2 = task_ii
+task_3 = task_iii
+task_4 = task_iv
 if __name__ == "__main__":
     
-    # Test Exercise 1
-    print("\n Exercise 1: Fibonacci Series ")
+    print("=" * 60)
+    print("Testing All Exercises")
+    print("=" * 60)
+    
+    # Test Exercise 1: Fibonacci
+    print("\n=== Exercise 1: Fibonacci Series ===")
     test_cases = [0, 1, 2, 5, 9, 10]
     for n in test_cases:
         print(f"fib({n}) = {fib(n)}")
     
-    # Test Exercise 2
-    print("\n Exercise 2: Binary Conversion ")
+    # Test Exercise 2: Binary Conversion
+    print("\n=== Exercise 2: Binary Conversion ===")
     test_numbers = [0, 1, 2, 7, 12, 15, 255]
     for num in test_numbers:
         binary = to_binary(num)
-        expected = int(bin(num)[2:]) if num > 0 else 0
+        
+        expected = bin(num)[2:]
         check = "✓" if binary == expected else "✗"
         print(f"to_binary({num}) = {binary} {check}")
     
-    # Test Exercise 3
-    print("\n Exercise 3: Data Analysis Tasks ")
+    # Test Exercise 3: Data Analysis
+    print("\n=== Exercise 3: Data Analysis Tasks ===")
     
     try:
+        
         print("\nDataset info:")
         print(f"Shape: {df_bellevue.shape}")
         print(f"Columns: {df_bellevue.columns.tolist()}")
@@ -233,20 +272,20 @@ if __name__ == "__main__":
         print(f"First 3 columns (least missing): {result1[:3]}")
         print(f"Last 3 columns (most missing): {result1[-3:]}")
         
-        print("\nTask 2: Admissions by year ")
+        print("\n Task 2: Admissions by year ")
         result2 = task_ii()
         if not result2.empty:
             print(result2.head())
             print(f"Total years: {len(result2)}")
             print(f"Total admissions: {result2['total_admissions'].sum()}")
         
-        print("\n Task 3: Average age by gender ")
+        print("\nTask 3: Average age by gender ")
         result3 = task_iii()
         if not result3.empty:
             print(result3)
             print(f"Average age across all genders: {result3.mean():.2f}")
         
-        print("\nTask 4: Top 5 professions ")
+        print("\n--- Task 4: Top 5 professions ---")
         result4 = task_iv()
         if result4:
             for i, prof in enumerate(result4, 1):
