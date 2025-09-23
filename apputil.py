@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 
-
+# Load the dataset from GitHub URL
 url = 'https://github.com/melaniewalsh/Intro-Cultural-Analytics/raw/master/book/data/bellevue_almshouse_modified.csv'
 df_bellevue = pd.read_csv(url)
+
 
 # Exercise 1: Fibonacci function
 def fib(n):
@@ -17,14 +18,16 @@ def fib(n):
     Returns:
         The nth Fibonacci number
     """
-
     if n == 0:
         return 0
     elif n == 1:
         return 1
     
-    
     return fib(n - 1) + fib(n - 2)
+
+
+
+fibonacci = fib
 
 
 # Exercise 2: Binary conversion
@@ -38,37 +41,29 @@ def to_binary(n):
     Returns:
         Binary representation as a string (e.g., 12 returns '1100')
     """
-    
     if n == 0:
         return '0'
     elif n == 1:
         return '1'
     
-    
     return to_binary(n // 2) + str(n % 2)
 
 
 # Exercise 3: Data analysis tasks
-def task_i():
+def task_1():
     """
     Sort columns by missing values (least to most).
     Returns a list of column names.
     """
-    global df_bellevue  
+    global df_bellevue
     
-    # Fix gender column 
     if 'gender' in df_bellevue.columns:
         print("Fixing gender column issues...")
-        # Convert to string to handle mixed types
         df_bellevue['gender'] = df_bellevue['gender'].astype(str)
-        # Clean up whitespace
         df_bellevue['gender'] = df_bellevue['gender'].str.strip()
-        # Replace 'nan' string with actual NaN
         df_bellevue.loc[df_bellevue['gender'] == 'nan', 'gender'] = np.nan
     
-    # Count missing values for each column
     missing_counts = df_bellevue.isnull().sum()
-    
     
     sorted_columns = missing_counts.sort_values().index.tolist()
     
@@ -77,16 +72,14 @@ def task_i():
     return sorted_columns
 
 
-def task_ii():
+def task_2():
     """
     Year and admissions dataframe.
     Returns a DataFrame with 'year' and 'total_admissions' columns.
     """
     global df_bellevue
     
-    
     df_temp = df_bellevue.copy()
-    
     
     year_extracted = False
     
@@ -95,12 +88,11 @@ def task_ii():
         year_extracted = True
     elif 'date_in' in df_temp.columns:
         print("Extracting year from 'date_in' column...")
-        
+        # Convert to datetime and extract year
         df_temp['year'] = pd.to_datetime(df_temp['date_in'], errors='coerce').dt.year
         year_col = 'year'
         year_extracted = True
     else:
-        
         for col in df_temp.columns:
             if 'date' in col.lower() or 'year' in col.lower():
                 print(f"Found date/year column: {col}")
@@ -116,9 +108,7 @@ def task_ii():
         print("Warning: No year or date column found!")
         return pd.DataFrame({'year': [], 'total_admissions': []})
     
-    
     df_temp = df_temp[df_temp[year_col].notna()]
-    
     
     result = df_temp.groupby(year_col).size().reset_index(name='total_admissions')
     result.columns = ['year', 'total_admissions']
@@ -130,14 +120,14 @@ def task_ii():
     return result
 
 
-def task_iii():
+def task_3():
     """
     Average age by gender series.
     Returns a Series with gender as index and average age as values.
     """
     global df_bellevue
     
-    
+    # Make a copy to avoid modifying the original
     df_temp = df_bellevue.copy()
     
     # Clean gender column
@@ -151,7 +141,7 @@ def task_iii():
         print("Warning: No 'gender' column found!")
         return pd.Series()
     
-    
+    # Find age column
     age_col = None
     for col in df_temp.columns:
         if 'age' in col.lower():
@@ -163,13 +153,10 @@ def task_iii():
         print("Warning: No age column found!")
         return pd.Series()
     
-    
     df_temp[age_col] = pd.to_numeric(df_temp[age_col], errors='coerce')
-    
     
     df_clean = df_temp.dropna(subset=['gender', age_col])
     
-
     result = df_clean.groupby('gender')[age_col].mean()
     
     print(f"Found {len(result)} gender categories")
@@ -178,16 +165,14 @@ def task_iii():
     return result
 
 
-def task_iv():
+def task_4():
     """
     Top 5 professions list.
     Returns a list of the 5 most common professions in order of prevalence.
     """
     global df_bellevue
     
-    
     df_temp = df_bellevue.copy()
-    
     
     prof_col = None
     for col in df_temp.columns:
@@ -201,9 +186,7 @@ def task_iv():
         print("Available columns:", df_temp.columns.tolist())
         return []
     
-    
     df_temp[prof_col] = df_temp[prof_col].astype(str).str.strip()
-    
     
     valid_professions = df_temp[prof_col][
         (df_temp[prof_col] != 'nan') & 
@@ -211,13 +194,11 @@ def task_iv():
         (df_temp[prof_col].notna())
     ]
     
-    
     profession_counts = valid_professions.value_counts()
     
     if len(profession_counts) == 0:
         print("Warning: No valid professions found!")
         return []
-    
     
     top_5_professions = profession_counts.head(5).index.tolist()
     
@@ -228,20 +209,10 @@ def task_iv():
     return top_5_professions
 
 
-
-fibonacci = fib
-
-
-task_1 = task_i
-task_2 = task_ii
-task_3 = task_iii
-task_4 = task_iv
+# Testing section (optional)
 if __name__ == "__main__":
     
-    print("=" * 60)
-    print("Testing All Exercises")
-    print("=" * 60)
-    
+
     # Test Exercise 1: Fibonacci
     print("\n=== Exercise 1: Fibonacci Series ===")
     test_cases = [0, 1, 2, 5, 9, 10]
@@ -253,7 +224,6 @@ if __name__ == "__main__":
     test_numbers = [0, 1, 2, 7, 12, 15, 255]
     for num in test_numbers:
         binary = to_binary(num)
-        
         expected = bin(num)[2:]
         check = "✓" if binary == expected else "✗"
         print(f"to_binary({num}) = {binary} {check}")
@@ -262,31 +232,30 @@ if __name__ == "__main__":
     print("\n=== Exercise 3: Data Analysis Tasks ===")
     
     try:
-        
         print("\nDataset info:")
         print(f"Shape: {df_bellevue.shape}")
         print(f"Columns: {df_bellevue.columns.tolist()}")
         
-        print("\n Task 1: Columns by missing values ")
-        result1 = task_i()
+        print("\n--- Task 1: Columns by missing values ---")
+        result1 = task_1()
         print(f"First 3 columns (least missing): {result1[:3]}")
         print(f"Last 3 columns (most missing): {result1[-3:]}")
         
-        print("\n Task 2: Admissions by year ")
-        result2 = task_ii()
+        print("\n--- Task 2: Admissions by year ---")
+        result2 = task_2()
         if not result2.empty:
             print(result2.head())
             print(f"Total years: {len(result2)}")
             print(f"Total admissions: {result2['total_admissions'].sum()}")
         
-        print("\nTask 3: Average age by gender ")
-        result3 = task_iii()
+        print("\n--- Task 3: Average age by gender ---")
+        result3 = task_3()
         if not result3.empty:
             print(result3)
             print(f"Average age across all genders: {result3.mean():.2f}")
         
         print("\n--- Task 4: Top 5 professions ---")
-        result4 = task_iv()
+        result4 = task_4()
         if result4:
             for i, prof in enumerate(result4, 1):
                 print(f"{i}. {prof}")
